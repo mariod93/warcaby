@@ -36,8 +36,10 @@ private:
     int w;
     bool czy_zlapany;
     bool zmiana;
+    bool koniec_ruchu;
     TPole pole;
     TPole mouse_klik;
+    TPole bicie;
     //TGracz gracz1, gracz2;
 
 
@@ -45,8 +47,9 @@ private:
 public:
     TPlansza(QWidget *parent = 0);
     ~TPlansza();
+    int ** plansza();
     void paintEvent(QPaintEvent *);
-    void mousePressEvent(QMouseEvent *klik);
+
     void awans_damka();
     void wyznacz_ruchy(TPole pole);
     void wyznacz_bicia(TPole pole);
@@ -56,8 +59,16 @@ public:
     void ruch();
     bool wykonaj_ruch(TPole start, TPole koniec);
     bool wykonaj_bicie(TPole start, TPole koniec);
-    int gra();
+    void mousePressEvent(QMouseEvent *klik);
     void wyczysc_zaznaczenia();
+    int czy_wygrana();
+    bool czy_na_liscie(TPole, list<TRuch> lista);
+
+signals:
+    void klikniecie();
+
+public slots:
+      int gra();
 
 };
 
