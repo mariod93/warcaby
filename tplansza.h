@@ -34,6 +34,7 @@ private:
     list<TRuch> bicia;
     bool masz_bicie;
     int w;
+    bool brak_ruchow;
     bool czy_zlapany;
     bool zmiana;
     bool koniec_ruchu;
@@ -47,7 +48,8 @@ private:
 public:
     TPlansza(QWidget *parent = 0);
     ~TPlansza();
-    int ** plansza();
+    int** plansza();
+    int& gracz();
     void paintEvent(QPaintEvent *);
 
     void awans_damka();
@@ -64,11 +66,13 @@ public:
     int czy_wygrana();
     bool czy_na_liscie(TPole, list<TRuch> lista);
 
+
 signals:
     void klikniecie();
 
 public slots:
       int gra();
+      void nowa_gra();
 
 };
 

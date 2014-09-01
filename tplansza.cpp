@@ -16,6 +16,7 @@ TPlansza::TPlansza(QWidget *parent):
     masz_bicie=false;
     zmiana= true;
     koniec_ruchu=false;
+    brak_ruchow=false;
     pole.x=0;
     pole.y=0;
     biale=czarne=12;
@@ -99,7 +100,7 @@ TPlansza::~TPlansza(){
 }
 
 
-int ** TPlansza::plansza(){
+int** TPlansza::plansza(){
     return pola;
 }
 
@@ -109,11 +110,11 @@ int ** TPlansza::plansza(){
  */
 void TPlansza::paintEvent(QPaintEvent *){
     QPainter painter(this);
-
+    int a=70;
     //rysowanie planszy
     for(int i=1; i<POLA-1; i++){
         for(int j=1; j<POLA-1; j++){
-            painter.fillRect(w*(j-1), w*(i-1), w, w,kolory_pol[j][i]);
+            painter.fillRect(a+w*(j-1), w*(i-1), w, w,kolory_pol[j][i]);
         }
     }
 
@@ -126,29 +127,42 @@ void TPlansza::paintEvent(QPaintEvent *){
             case 1:
                 painter.setBrush(Qt::black);
                 painter.setPen(Qt::white);
-                painter.drawEllipse(w*(x-1)+5,w*(y-1)+5,w-10,w-10);
+                painter.drawEllipse(a+w*(x-1)+5,w*(y-1)+5,w-10,w-10);
                 break;
 
             case -1:
                 painter.setBrush(Qt::white);
                 painter.setPen(Qt::black);
-                painter.drawEllipse(w*(x-1)+5,w*(y-1)+5,w-10,w-10);
+                painter.drawEllipse(a+w*(x-1)+5,w*(y-1)+5,w-10,w-10);
                 break;
 
             case 2:
                 painter.setBrush(Qt::black);
                 painter.setPen(Qt::white);
-                painter.drawEllipse(w*(x-1)+5,w*(y-1)+5,w-30,w-30);
+                painter.drawEllipse(a+w*(x-1)+5,w*(y-1)+5,w-30,w-30);
                 break;
 
             case -2:
                 painter.setBrush(Qt::white);
                 painter.setPen(Qt::black);
-                painter.drawEllipse(w*(x-1)+5,w*(y-1)+5,w-30,w-30);
+                painter.drawEllipse(a+w*(x-1)+5,w*(y-1)+5,w-30,w-30);
                 break;
             }
 
         }
+    }
+
+    //rysowanie zbitych pionkow
+    for(int i=0; i<12-biale; i++){
+
+        painter.setBrush(Qt::white);
+        painter.setPen(Qt::black);
+        painter.drawEllipse(30,(w-25)*i+5,w-30,w-30);
+    }
+    for(int i=0; i<12-czarne; i++){
+        painter.setBrush(Qt::black);
+        painter.setPen(Qt::white);
+        painter.drawEllipse(a+8*w+5,(w-25)*i+5,w-30,w-30);
     }
 }
 
@@ -178,10 +192,6 @@ void TPlansza::mousePressEvent(QMouseEvent *klik){
     mouse_klik=wyznacz_poz_klikniecia(klik);
     klikniecie();
 
-    qDebug() << endl << "zmiana: " <<zmiana;
-    qDebug() << "bicie: " << masz_bicie;
-    qDebug() << "zlapany: "<< czy_zlapany;
-    qDebug() << "akt: " << akt;
 }
 
 
@@ -332,9 +342,12 @@ int TPlansza::czy_wygrana(){
                 b++;
         }
     }
-    if(b == 0)
+    biale=b;
+    czarne=c;
+    update();
+    if(biale == 0 or (akt==-1 and brak_ruchow==true))
         return 1;
-    else if(c == 0)
+    else if(czarne == 0 or(akt==1 and brak_ruchow==true))
         return -1;
     else
         return 0;
@@ -435,7 +448,7 @@ void TPlansza::wyznacz_ruchy(TPole pole){
 TPole TPlansza::wyznacz_poz_klikniecia(QMouseEvent *klik){
     TPole pole;
     //wyznaczam pole, nad ktorym kliknalem
-    pole.x = klik->pos().x() /w +1;
+    pole.x = (klik->pos().x()-70) /w +1;
     pole.y = klik->pos().y() /w +1;
     return pole;
 }
@@ -580,9 +593,14 @@ bool TPlansza::przeglad_pola(int gracz){
                 pole.x=i;
                 pole.y=j;
                 wyznacz_bicia(pole);
+                wyznacz_ruchy(pole);
+
             }
         }
     }
+    if(ruchy.empty() and bicia.empty())
+        brak_ruchow=true;
+    ruchy.clear();
     return !bicia.empty();
 }
 
@@ -677,11 +695,58 @@ void TPlansza::wyczysc_zaznaczenia(){
 }
 
 void TPlansza::awans_damka(){
-    for(int i=1; i<8; i++){
+    for(int i=1; i<9; i++){
         if(pola[i][1] == -1) // biala damka
             pola[i][1]=-2;
         if(pola[i][8] == 1)
             pola[i][8]=2;
     }
     update();
+}
+
+int &TPlansza::gracz(){
+    return akt;
+}
+
+void TPlansza::nowa_gra(){
+    akt=-1;
+    czy_zlapany= false;
+    masz_bicie=false;
+    zmiana= true;
+    koniec_ruchu=false;
+    brak_ruchow=false;
+    pole.x=0;
+    pole.y=0;
+    biale=czarne=12;
+    akt=-1;
+
+    //ramka planszy
+    for(int i=0; i<POLA; i++){
+        pola[0][i]=10;
+        pola[i][0]=10;
+        pola[POLA-1][i]=10;
+        pola[i][POLA-1]=10;
+    }
+    //zainicjowanie wszystkich pol zerami
+    for (int i=1; i<POLA-1; i++){
+        for(int j=1; j<POLA-1; j++){
+            if((i+j)%2 == 1)
+                pola[i][j]=0;
+            else
+                pola[i][j]=10;
+        }
+    }
+
+    for(int i=1; i<4; i++){
+        for(int j=1; j<POLA-1; j+=2){
+            pola[j+i%2][i]=1;
+        }
+    }
+    for(int i=6; i<9; i++){
+        for(int j=1; j<POLA-1; j+=2){
+            pola[j+i%2][i]=-1;
+        }
+    }
+    update();
+
 }
