@@ -21,18 +21,16 @@ public:
 
 
 private:
+
+
     Ui::MainWindow *ui;
     TPlansza *plansza;
-    QTcpSocket *socket;
 
 
-private slots:
-    void on_connect_clicked();
 public slots:
-    void pobierzDane();
      void wyswietl();
      void nowa_gra();
-     void wyslijDane();
+
 };
 
 #endif // MAINWINDOW_H

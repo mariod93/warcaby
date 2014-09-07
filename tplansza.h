@@ -24,24 +24,25 @@ class TPlansza: public QWidget
 {
     Q_OBJECT
 private:
-    int biale,czarne;
-    int akt;
-    int **pola;
-    QColor **kolory_pol;
-    QColor *tabKolor;
-    list<TRuch>::iterator it;
-    list<TRuch> ruchy;
-    list<TRuch> bicia;
-    bool masz_bicie;
-    int w;
-    bool brak_ruchow;
-    bool czy_zlapany;
-    bool zmiana;
-    bool koniec_ruchu;
-    TPole pole;
-    TPole mouse_klik;
-    TPole bicie;
-    //TGracz gracz1, gracz2;
+    int biale; /*! \var ilość białych pionków na planszy */
+    int czarne; /*! \var ilość czarnych pionków na planszy */
+    int akt; /*! \var aktualny gracz */
+    int **pola; /*! \var tablica reprezentujaca stan planszy, co gdzie stoi */
+    QColor **kolory_pol; /*! \var tablica okreslajaca kolory pol */
+    QColor *tabKolor; /*! \var pomocnicza tablica z 2 kolorami, bialy i brazowy */
+    list<TRuch>::iterator it; /*! \var iterator na listy bic i ruchow */
+    list<TRuch> ruchy; /*! \var lista ruchow */
+    list<TRuch> bicia; /*! \var lista bic */
+    bool masz_bicie; /*! \var flaga okreslajaca czy gracz ma bicie */
+    int w; /*! \var szerokosc jednego pola */
+    bool brak_ruchow; /*! \var flaga okreslajaca czy dany gracz ma jakikolwiek ruch */
+    bool czy_zlapany; /*! \var flaga okreslajaca czy zaznaczylem pionek */
+    bool zmiana; /*! \var flaga okreslajaca czy zmienic kto aktualnie wykonuje ruch */
+    bool koniec_ruchu; /*! \var flaga okreslajaca koniec ruchu */
+    TPole pole; /*! \var startowe pole przy wykonywaniu ruchu */
+    TPole mouse_klik; /*! \var koncowe pole przy wykonywaniu ruchu */
+    TPole bicie; /*! \var zapamietuje pozycje startowa bicia */
+
 
 
 
@@ -59,6 +60,12 @@ public:
     TPole wyznacz_poz_klikniecia(QMouseEvent *klik);
     void zamaluj_pola();
     void ruch();
+    /*!
+     * \brief wykonaj_ruch
+     * \param start
+     * \param koniec
+     * \return
+     */
     bool wykonaj_ruch(TPole start, TPole koniec);
     bool wykonaj_bicie(TPole start, TPole koniec);
     void mousePressEvent(QMouseEvent *klik);
