@@ -1,13 +1,6 @@
 #include "tplansza.h"
 #define POLA 10
-
-
-/*!
- * \brief Konstruktor klasy:  TPlansza::TPlansza
- * \param parent - wskaznik do okna rodzica
- *
- */
-
+//*************************************************************************
 TPlansza::TPlansza(QWidget *parent):
     QWidget(parent)
 {
@@ -85,13 +78,10 @@ TPlansza::TPlansza(QWidget *parent):
     }
 
 
-   connect(this, SIGNAL(klikniecie()),this,SLOT(gra()));
+    connect(this, SIGNAL(klikniecie()),this,SLOT(gra()));
 }
 
-
-/*!
- * \brief Dekonstruktor klasy: TPlansza::~TPlansza
- */
+//*************************************************************************
 TPlansza::~TPlansza(){
     for(int i=0; i<POLA; i++){
         delete [] pola[i];
@@ -102,18 +92,16 @@ TPlansza::~TPlansza(){
     delete [] tabKolor;
 }
 
+//*************************************************************************
 //metoda dająca dostep do tablicy stanu planszy
 int** TPlansza::plansza(){
     return pola;
 }
 
-/*!
- * \brief Metoda malująca pole gry: TPlansza::paintEvent
- *  Metoda maluje planszę, a następnie rysuje pionki.
- */
+//*************************************************************************
 void TPlansza::paintEvent(QPaintEvent *){
     QPainter painter(this);
-    int a=70;//przesuwam poczatek planszy w prawo
+    int a=w;//przesuwam poczatek planszy w prawo
     //rysowanie planszy
     for(int i=1; i<POLA-1; i++){
         for(int j=1; j<POLA-1; j++){
@@ -151,7 +139,6 @@ void TPlansza::paintEvent(QPaintEvent *){
                 painter.drawEllipse(a+w*(x-1)+5,w*(y-1)+5,w-30,w-30);
                 break;
             }
-
         }
     }
 
@@ -160,7 +147,7 @@ void TPlansza::paintEvent(QPaintEvent *){
 
         painter.setBrush(Qt::white);
         painter.setPen(Qt::black);
-        painter.drawEllipse(30,(w-25)*i+5,w-30,w-30);
+        painter.drawEllipse(20,(w-25)*i+5,w-30,w-30);
     }
     for(int i=0; i<12-czarne; i++){
         painter.setBrush(Qt::black);
@@ -169,6 +156,7 @@ void TPlansza::paintEvent(QPaintEvent *){
     }
 }
 
+//*************************************************************************
 //sprawdza czy ruch jest na liscie bic lub ruchow
 bool TPlansza::czy_na_liscie(TPole pole, list<TRuch> lista){
     bool flaga=false;
@@ -183,21 +171,13 @@ bool TPlansza::czy_na_liscie(TPole pole, list<TRuch> lista){
     return flaga;
 }
 
-/*!
- * \brief Metoda obsługująca myszkę: TPlansza::mousePressEvent
- * Metoda konwertuje współrzędne położenia kursora na pozycje na planszy ( które pole).
- * Następnie wywołuje funkcje obsługujące wykonanie ruchu.
- *
- * \param klik - wskaźnik do zdarzenia myszki
- */
+//*************************************************************************
 void TPlansza::mousePressEvent(QMouseEvent *klik){
-
     mouse_klik=wyznacz_poz_klikniecia(klik);
     klikniecie();
-
 }
 
-
+//*************************************************************************
 int TPlansza::gra(){
     //warunek konca gry
     if(czy_wygrana() != 0){
@@ -205,136 +185,123 @@ int TPlansza::gra(){
     else{
         if(zmiana == true){
             zmiana=false;
+            masz_bicie=przeglad_pola(akt);
 
-                masz_bicie=przeglad_pola(akt);
-                //jesli  klikniete pole jest poprawne
+            //jesli  klikniete pole jest poprawne
             if(pola[mouse_klik.x][mouse_klik.y] != 10){
-                   //jesli zaznaczylem pionek ktory ma bicie
+                //jesli zaznaczylem pionek ktory ma bicie
                 if( masz_bicie and czy_na_liscie(mouse_klik,bicia) ){
                     bicia.clear();
                     ruch(); // to wykonuje ruch
                 }
                 else{
                     ruch();
+                }
             }
         }
-        }
-        else{
-            ruch();}
+        else
+            ruch();
         awans_damka();
     }
-
     return 0;
 }
 
-/*!
- * \brief Metoda implenemtuje wykonanie ruchu przez gracza.
- *
- */
+//*************************************************************************
 void TPlansza::ruch(){
-        bool a=false;
-        if(masz_bicie and bicie==mouse_klik)
-            a=true;
 
-        //gdy czy_zlapany == true to gracz zaznaczyl pionek, ktorym chce pojechac
-        //kolejne zaznaczenie poprawnego pola spowoduje wykonanie ruchu
+    //gdy czy_zlapany == true to gracz zaznaczyl pionek, ktorym chce pojechac
+    //kolejne zaznaczenie poprawnego pola spowoduje wykonanie ruchu
 
-        switch(czy_zlapany){
-        case false:
+    switch(czy_zlapany){
+    case false:
 
-                //jesli zaznaczylismy swoj pionek
-                if(pola[mouse_klik.x][mouse_klik.y] == akt or pola[mouse_klik.x][mouse_klik.y] == akt*2){
-                    czy_zlapany =true;
-                    ruchy.clear();
-                    bicia.clear();
-                    wyznacz_ruchy(mouse_klik);
-                    wyznacz_bicia(mouse_klik);
+        //jesli zaznaczylismy swoj pionek
+        if(pola[mouse_klik.x][mouse_klik.y] == akt or pola[mouse_klik.x][mouse_klik.y] == akt*2){
+            czy_zlapany =true;
+            ruchy.clear();
+            bicia.clear();
+            wyznacz_ruchy(mouse_klik);
+            wyznacz_bicia(mouse_klik);
 
-                    // zapamietuje pozycje pionka, ktory zaznaczylem
-                    //pole to jest pozycja poczatkowa pionka ktorym chce wykonac ruch
-                    pole=mouse_klik;
-                    kolory_pol[mouse_klik.x][mouse_klik.y]=Qt::yellow;
-                    zamaluj_pola();
+            // zapamietuje pozycje pionka, ktory zaznaczylem
+            //pole to jest pozycja poczatkowa pionka ktorym chce wykonac ruch
+            pole=mouse_klik;
+            kolory_pol[mouse_klik.x][mouse_klik.y]=Qt::yellow;
+            zamaluj_pola();
 
-                //jesli pionkiem nie da sie ruszyc, anuluje ruch
-                if(ruchy.empty() and bicia.empty()){
-                    kolory_pol[mouse_klik.x][mouse_klik.y]=tabKolor[(pole.x+pole.y)%2];
-                    czy_zlapany=false;
-                }
-                update();
+            //jesli pionkiem nie da sie ruszyc, anuluje ruch
+            if(ruchy.empty() and bicia.empty()){
+                kolory_pol[mouse_klik.x][mouse_klik.y]=tabKolor[(pole.x+pole.y)%2];
+                czy_zlapany=false;
             }
-            break;
+            update();
+        }
+        break;
 
         //gdy gracz ma zaznaczony pionek
-        case true:
+    case true:
 
-            //gdy gracz zmieni zdanie i chce zagrac innym pionkiem
-            if(pola[mouse_klik.x][mouse_klik.y] == akt or pola[mouse_klik.x][mouse_klik.y] == akt*2){
+        //gdy gracz zmieni zdanie i chce zagrac innym pionkiem
+        if(pola[mouse_klik.x][mouse_klik.y] == akt or pola[mouse_klik.x][mouse_klik.y] == akt*2){
 
-                kolory_pol[pole.x][pole.y]=tabKolor[(pole.x+pole.y)%2];
-                wyczysc_zaznaczenia();
-                ruchy.clear();
-                bicia.clear();
-                wyznacz_bicia(mouse_klik);
-                wyznacz_ruchy(mouse_klik);
+            kolory_pol[pole.x][pole.y]=tabKolor[(pole.x+pole.y)%2];
+            wyczysc_zaznaczenia();
+            ruchy.clear();
+            bicia.clear();
+            wyznacz_bicia(mouse_klik);
+            wyznacz_ruchy(mouse_klik);
 
-                pole=mouse_klik; // zapamietuje pozycje pionka, ktory zaznaczylem
-                kolory_pol[mouse_klik.x][mouse_klik.y]=Qt::yellow;
-                zamaluj_pola();
+            pole=mouse_klik; // zapamietuje pozycje pionka, ktory zaznaczylem
+            kolory_pol[mouse_klik.x][mouse_klik.y]=Qt::yellow;
+            zamaluj_pola();
 
-                //jesli pionkiem nie da sie ruszyc, anuluje ruch
-                if(ruchy.empty() and bicia.empty()){
-                    kolory_pol[mouse_klik.x][mouse_klik.y]=tabKolor[(pole.x+pole.y)%2];
-                    czy_zlapany=false;
-                }
-                update();
-
+            //jesli pionkiem nie da sie ruszyc, anuluje ruch
+            if(ruchy.empty() and bicia.empty()){
+                kolory_pol[mouse_klik.x][mouse_klik.y]=tabKolor[(pole.x+pole.y)%2];
+                czy_zlapany=false;
             }
+            update();
+        }
 
-            //wykonaj ruch lub bicie
-            //gdy jest bicie nalezy je wykonac
-            else{
-                if(masz_bicie and czy_zlapany == true){
-                    if(wykonaj_bicie(pole, mouse_klik)){
-                        czy_zlapany = false;
-                        zmiana=true;
+        //wykonaj ruch lub bicie
+        //gdy jest bicie nalezy je wykonac
+        else{
+            if(masz_bicie and czy_zlapany == true){
+                if(wykonaj_bicie(pole, mouse_klik)){
+                    czy_zlapany = false;
+                    zmiana=true;
 
-                        wyczysc_zaznaczenia();
-                        bicia.clear();
-                        wyznacz_bicia(mouse_klik);
-                        masz_bicie=!bicia.empty();
-                        if(masz_bicie)
-                            zmiana=false;
-
-                    }
                     wyczysc_zaznaczenia();
-
+                    bicia.clear();
+                    wyznacz_bicia(mouse_klik);
+                    masz_bicie=!bicia.empty();
+                    if(masz_bicie)
+                        zmiana=false;
                 }
-                else if (czy_zlapany ==true){
-                    if(wykonaj_ruch(pole,mouse_klik)){
-                        zmiana=true;
-                        czy_zlapany = false;
-                        wyczysc_zaznaczenia();
-                    }
-                }
-                if(zmiana == true){
-
-                    if(akt == -1){
-                        akt=1;
-                    }
-                    else{
-                        akt=-1;
-                    }
+                wyczysc_zaznaczenia();
+            }
+            else if (czy_zlapany ==true){
+                if(wykonaj_ruch(pole,mouse_klik)){
+                    zmiana=true;
+                    czy_zlapany = false;
+                    wyczysc_zaznaczenia();
                 }
             }
+            if(zmiana == true){
 
-            break;
-
-
-
+                if(akt == -1){
+                    akt=1;
+                }
+                else{
+                    akt=-1;
+                }
+            }
+        }
+        break;
     }
 }
 
+//*************************************************************************
 int TPlansza::czy_wygrana(){
     int b=0,c=0;
     //zliczam pionki graczy
@@ -357,12 +324,7 @@ int TPlansza::czy_wygrana(){
         return 0;
 }
 
-/*!
-         * \brief Metoda wyznacza wszystkie możliwe ruchy pionka na podanym polu
-         * Ruchy zapisywane są na liście "ruchy". Nie są tu wyznaczane bicia!
-         * \param pole - położenie pionka
-         * \param
-         */
+//*************************************************************************
 void TPlansza::wyznacz_ruchy(TPole pole){
     TPole pionek;
     TRuch ruch;
@@ -453,15 +415,19 @@ void TPlansza::wyznacz_ruchy(TPole pole){
     }
 }
 
+//*************************************************************************
 TPole TPlansza::wyznacz_poz_klikniecia(QMouseEvent *klik){
     TPole pole;
     //wyznaczam pole, nad ktorym kliknalem
-    pole.x = (klik->pos().x()-70) /w +1;
-    pole.y = klik->pos().y() /w +1;
+
+    // pole.x = ( (klik->pos().x()-70) /w +1 );
+    // pole.y = klik->pos().y() /w +1;
+    pole.x = klik->pos().x()/w;
+    pole.y = klik->pos().y()/w +1;
     return pole;
 }
 
-
+//*************************************************************************
 void TPlansza::wyznacz_bicia(TPole pole){
     int przeciwnik;
     int x=pole.x;
@@ -595,6 +561,7 @@ void TPlansza::wyznacz_bicia(TPole pole){
     }
 }
 
+//*************************************************************************
 //po kazdym ruchu sprawdzamy czy jest jakies bicie lub ruch
 bool TPlansza::przeglad_pola(int gracz){
     TPole pole;
@@ -615,10 +582,8 @@ bool TPlansza::przeglad_pola(int gracz){
     return !bicia.empty(); //zwraca true jesli jest jakies bicie
 }
 
-
-
+//*************************************************************************
 void TPlansza::zamaluj_pola(){
-
     if(bicia.empty()){
         for(it=ruchy.begin();it!=ruchy.end(); it++){
             kolory_pol[it->koniec.x][it->koniec.y]=Qt::red;
@@ -631,12 +596,10 @@ void TPlansza::zamaluj_pola(){
     }
 }
 
-
+//*************************************************************************
 bool TPlansza::wykonaj_bicie(TPole start, TPole koniec){
     bool a=false;// czy zaznaczylem poprawne pola
-
     kolory_pol[start.x][start.y]=tabKolor[(start.x+start.y)%2];
-
     for(it=bicia.begin(); it != bicia.end(); it++){
         if(it->koniec == koniec and it->start == start){
             a=true;
@@ -651,10 +614,10 @@ bool TPlansza::wykonaj_bicie(TPole start, TPole koniec){
                 x=1;
             else
                 x=-1;
-           if((koniec.y-start.y) >0)
-               y=1;
-           else
-               y=-1;
+            if((koniec.y-start.y) >0)
+                y=1;
+            else
+                y=-1;
             //przestawiam pionek, ktory bil
             pola[koniec.x][koniec.y]=pola[start.x][start.y];
             pola[start.x][start.y]=0;
@@ -669,6 +632,7 @@ bool TPlansza::wykonaj_bicie(TPole start, TPole koniec){
     return a;
 }
 
+//*************************************************************************
 //zwraca true jesli ruch zostal poprawnie wykonany
 bool TPlansza::wykonaj_ruch(TPole start, TPole koniec){
     bool a=false;
@@ -685,18 +649,19 @@ bool TPlansza::wykonaj_ruch(TPole start, TPole koniec){
     return a;
 }
 
-
+//*************************************************************************
 bool operator == (TPole p1, TPole p2){
     return (p1.x == p2.x) and (p1.y == p2.y);
 }
 
+//*************************************************************************
 TPole & TPole::operator = (TPole p){
     this->x=p.x;
     this->y=p.y;
+    return *this;
 }
 
-
-
+//*************************************************************************
 void TPlansza::wyczysc_zaznaczenia(){
     for(it=ruchy.begin();it!=ruchy.end(); it++)//kasuje podswietlenia mozliwych ruchow
         kolory_pol[it->koniec.x][it->koniec.y]=tabKolor[(it->koniec.x+it->koniec.y)%2];
@@ -707,6 +672,7 @@ void TPlansza::wyczysc_zaznaczenia(){
     bicia.clear();
 }
 
+//*************************************************************************
 void TPlansza::awans_damka(){
     for(int i=1; i<9; i++){
         if(pola[i][1] == -1) // biala damka
@@ -717,10 +683,12 @@ void TPlansza::awans_damka(){
     update();
 }
 
+//*************************************************************************
 int &TPlansza::gracz(){
     return akt;
 }
 
+//*************************************************************************
 void TPlansza::nowa_gra(){
     akt=-1;
     czy_zlapany= false;
@@ -761,5 +729,4 @@ void TPlansza::nowa_gra(){
         }
     }
     update();
-
 }
